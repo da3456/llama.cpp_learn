@@ -95,7 +95,7 @@ if (NOT DEFINED GGML_LLAMAFILE)
 endif()
 
 if (NOT DEFINED GGML_CUDA_GRAPHS)
-    set(GGML_CUDA_GRAPHS_DEFAULT ON)
+    set(GGML_CUDA_GRAPHS_DEFAULT OFF)
 endif()
 
 # transition helpers
