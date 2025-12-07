@@ -80,6 +80,11 @@ models-mnt
 !models/.editorconfig
 !models/ggml-vocab-*.gguf*
 
+# llm models
+
+DeepSeek-R1-Distill-Qwen-1___5B/*
+internlm2-1_8b/*
+
 # Zig
 zig-out/
 zig-cache/
