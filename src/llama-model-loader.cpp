@@ -925,7 +925,7 @@ bool llama_model_loader::load_all_data(
     }
 
     for (struct ggml_tensor * cur = ggml_get_first_tensor(ctx); cur != NULL; cur = ggml_get_next_tensor(ctx, cur)) {
-        const auto * weight = get_weight(ggml_get_name(cur));
+        const auto * weight = get_weight(ggml_get_name(cur));  // weights_map里面找相应的tensor
         if (weight == nullptr) {
             // this can happen with split experts models
             continue;

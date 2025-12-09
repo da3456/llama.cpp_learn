@@ -268,18 +268,18 @@ struct llama_mmap::impl {
     std::vector<std::pair<size_t, size_t>> mapped_fragments;
 
     impl(struct llama_file * file, size_t prefetch, bool numa) {
-        size = file->size();
+        size = file->size();  // 记录文件大小、获取文件描述符，默认用共享映射。
         int fd = file->file_id();
         int flags = MAP_SHARED;
-        if (numa) { prefetch = 0; }
-#ifdef __linux__
-        if (posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL)) {
+        if (numa) { prefetch = 0; }  // 如果启用 NUMA 模式，就禁用预取（prefetch）
+#ifdef __linux__       //告诉内核会顺序读取，便于内核优化读盘。如果失败会打印警告。
+        if (posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL)) { 
             LLAMA_LOG_WARN("warning: posix_fadvise(.., POSIX_FADV_SEQUENTIAL) failed: %s\n",
                     strerror(errno));
         }
-        if (prefetch) { flags |= MAP_POPULATE; }
+        if (prefetch) { flags |= MAP_POPULATE; } // 如果指定预取，mmap 时带 MAP_POPULATE，让内核提前填充页。
 #endif
-        addr = mmap(NULL, file->size(), PROT_READ, flags, fd, 0);
+        addr = mmap(NULL, file->size(), PROT_READ, flags, fd, 0); // 实际进行内存映射。失败则抛异常。
         if (addr == MAP_FAILED) {
             throw std::runtime_error(format("mmap failed: %s", strerror(errno)));
         }
@@ -296,7 +296,7 @@ struct llama_mmap::impl {
                         strerror(errno));
             }
         }
-
+        // 记录当前映射的片段范围（从 0 到文件尾），用于后续可能的部分 munmap
         mapped_fragments.emplace_back(0, file->size());
     }
 
