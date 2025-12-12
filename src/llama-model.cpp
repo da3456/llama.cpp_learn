@@ -281,6 +281,13 @@ static buft_list_t make_cpu_buft_list(const std::vector<ggml_backend_dev_t> & de
     // generally, this will be done using the first device in the list
     // a better approach would be to handle this on a weight-by-weight basis using the offload_op
     // function of the device to determine if it would benefit from being stored in a host buffer
+    /*这段注释的意思是：
+    添加一种主机端（CPU）的内存缓冲类型。
+    当 GPU 处理大规模 batch 时，把 tensor 先存 CPU 内存，可以减少 GPU 与 CPU 之间的数据传输带来的时间消耗，因此是有性能意义的。
+    通常用设备列表里的第一个设备来决定 host buffer 的行为。
+    更优方案是：对每个权重单独判断是否应该存 host buffer 内存，而不是一刀切。
+    设备的 offload_op 函数能帮助判断某个权重放在 host buffer 是否有利于性能。*/
+
     for (auto * dev : devices) {
         ggml_backend_buffer_type_t buft = ggml_backend_dev_host_buffer_type(dev);
         if (buft) {

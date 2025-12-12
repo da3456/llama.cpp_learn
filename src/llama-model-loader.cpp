@@ -533,7 +533,7 @@ llama_model_loader::llama_model_loader(const std::string & fname, bool use_mmap,
         uint32_t n_type_max = 0;
         enum ggml_type type_max = GGML_TYPE_F32;
 
-        for (const auto & it : weights_map) {
+        for (const auto & it : weights_map) {  // 找到最多类型type，
             const llama_tensor_weight & w = it.second;
             const ggml_tensor * tensor = w.tensor;
 

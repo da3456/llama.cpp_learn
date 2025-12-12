@@ -9484,7 +9484,7 @@ struct llama_model * llama_model_load_from_file(
         ggml_backend_dev_memory(dev, &free, &total);
         LLAMA_LOG_INFO("%s: using device %s (%s) - %zu MiB free\n", __func__, ggml_backend_dev_name(dev), ggml_backend_dev_description(dev), free/1024/1024);
     }
-
+    // 执行到这里将gpu 4卡添加到model.devices, model.params赋值为params, params.progress_callback_user_data以及progress_callback
     const int status = llama_model_load(path_model, *model, params);
     GGML_ASSERT(status <= 0);
     if (status < 0) {
