@@ -643,7 +643,7 @@ void llama_set_abort_callback(struct llama_context * ctx, bool (*abort_callback)
     for (auto & backend : ctx->backends) {
         auto * reg = ggml_backend_dev_backend_reg(ggml_backend_get_device(backend.get()));
         auto * set_abort_callback_fn = (ggml_backend_set_abort_callback_t) ggml_backend_reg_get_proc_address(reg, "ggml_backend_set_abort_callback");
-        if (set_abort_callback_fn) {
+        if (set_abort_callback_fn) { // gpu没有， cpu有
             set_abort_callback_fn(backend.get(), ctx->abort_callback, ctx->abort_callback_data);
         }
     }

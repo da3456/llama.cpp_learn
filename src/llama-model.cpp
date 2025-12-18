@@ -3473,6 +3473,7 @@ bool llama_model::load_tensors(llama_model_loader & ml) {
     // 创建后端缓冲区
     // 创建context和缓冲区映射的向量（每个context对应一个缓冲区映射）
     std::vector<std::pair<ggml_context *, llama_buf_map>> ctx_bufs;
+    // 目前调试到这里，发现mmap用到的size和size_data不一样, 目前还没看见mappings，mmaps_used的使用
     // 预留空间（大小为context映射的数量）
     ctx_bufs.reserve(ctx_map.size());
 
@@ -3522,7 +3523,7 @@ bool llama_model::load_tensors(llama_model_loader & ml) {
                 // 这允许在模型大小超过metal缓冲区大小但不超过RAM大小时使用部分卸载
                 void * addr = nullptr;
                 size_t first, last; // NOLINT
-                // 获取该文件在context中的映射范围
+                // 获取该文件在context中的映射范围,first和last是该ctx全部tensor在权重文件的开头与末尾偏移
                 ml.get_mapping_range(&first, &last, &addr, idx, ctx);
                 // 如果范围无效，跳过
                 if (first >= last) {
@@ -3542,7 +3543,7 @@ bool llama_model::load_tensors(llama_model_loader & ml) {
             }
         }
         else {
-            // 如果不使用mmap或设备不支持，则从缓冲区类型分配context中的所有张量
+            //在cuda上先创建等于该ctx全部tensor大小之和的空间，并设置好所有tensor的data和ggml_backend_buffer_t指针
             ggml_backend_buffer_t buf = ggml_backend_alloc_ctx_tensors_from_buft(ctx, buft);
             if (buf == nullptr) {
                 throw std::runtime_error(format("unable to allocate %s buffer", ggml_backend_buft_name(buft)));
@@ -3572,7 +3573,7 @@ bool llama_model::load_tensors(llama_model_loader & ml) {
 
         // 为每个缓冲区设置使用标志
         for (auto & buf : buf_map) {
-            // 指示该缓冲区包含权重
+            // 指示该缓冲区包含权重,将buf的usage改为如下类型
             // 这用于ggml_backend_sched改进操作调度：使用权重的操作优先调度到包含该权重的后端
             ggml_backend_buffer_set_usage(buf.second, GGML_BACKEND_BUFFER_USAGE_WEIGHTS);
         }

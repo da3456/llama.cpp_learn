@@ -269,7 +269,7 @@ struct llama_mmap::impl {
 
     impl(struct llama_file * file, size_t prefetch, bool numa) {
         size = file->size();  // 记录文件大小、获取文件描述符，默认用共享映射。
-        int fd = file->file_id();
+        int fd = file->file_id();  // fopen得到的fp是File*, fd是文件描述符
         int flags = MAP_SHARED;
         if (numa) { prefetch = 0; }  // 如果启用 NUMA 模式，就禁用预取（prefetch）
 #ifdef __linux__       //告诉内核会顺序读取，便于内核优化读盘。如果失败会打印警告。
@@ -284,7 +284,7 @@ struct llama_mmap::impl {
             throw std::runtime_error(format("mmap failed: %s", strerror(errno)));
         }
 
-        if (prefetch > 0) {
+        if (prefetch > 0) {  // 提示内核整个映射区域很快会被用到属于 hint，不保证立即加载，但通常会触发异步预读。
             if (posix_madvise(addr, std::min(file->size(), prefetch), POSIX_MADV_WILLNEED)) {
                 LLAMA_LOG_WARN("warning: posix_madvise(.., POSIX_MADV_WILLNEED) failed: %s\n",
                         strerror(errno));
@@ -301,7 +301,7 @@ struct llama_mmap::impl {
     }
 
     static void align_range(size_t * first, size_t * last, size_t page_size) {
-        size_t offset_in_page = *first & (page_size - 1);
+        size_t offset_in_page = *first & (page_size - 1); // 计算在当前页内偏移量
         size_t offset_to_page = offset_in_page == 0 ? 0 : page_size - offset_in_page;
         *first += offset_to_page;
 

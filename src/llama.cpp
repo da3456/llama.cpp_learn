@@ -9691,7 +9691,7 @@ struct llama_context * llama_init_from_model(
         for (auto & backend : ctx->backends) {
             ggml_backend_dev_t dev = ggml_backend_get_device(backend.get());
             ggml_backend_reg_t reg = dev ? ggml_backend_dev_backend_reg(dev) : nullptr;
-            if (reg) {
+            if (reg) {//  gpu没有对应函数，cpu有
                 auto ggml_backend_set_n_threads_fn = (ggml_backend_set_n_threads_t) ggml_backend_reg_get_proc_address(reg, "ggml_backend_set_n_threads");
                 if (ggml_backend_set_n_threads_fn) {
                     ctx->set_n_threads_fns.emplace_back(backend.get(), ggml_backend_set_n_threads_fn);

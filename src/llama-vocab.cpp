@@ -2430,7 +2430,7 @@ std::vector<llama_token> llama_vocab::impl::tokenize(
 
     if (!raw_text.empty()) {
         fragment_buffer.emplace_front(raw_text, 0, raw_text.length());
-        tokenizer_st_partition(fragment_buffer, parse_special);
+        tokenizer_st_partition(fragment_buffer, parse_special); // 把输入文本中的特殊标记单独识别并保留下来
     }
 
     switch (get_type()) {

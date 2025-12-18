@@ -943,7 +943,7 @@ static bool alloc_tensor_range(struct ggml_context * ctx,
         free(*buffers);
         return false;
     }
-
+    // tallocr为tensor的data, buffer指针赋值
     struct ggml_tallocr tallocr = ggml_tallocr_new(buffer);
 
     for (struct ggml_tensor * t = first; t != last; t = ggml_get_next_tensor(ctx, t)) {
